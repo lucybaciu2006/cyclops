@@ -1,0 +1,11 @@
+<mj-text font-size="20px" font-weight="bold" color="#111827" padding-bottom="12px">
+  👤 New User Registered
+</mj-text>
+
+<mj-text font-size="16px" color="#111827">
+  A new user has registered with the email:
+</mj-text>
+
+<mj-text font-size="18px" font-weight="bold" color="#2563eb" padding-top="8px">
+  {{email}}
+</mj-text>

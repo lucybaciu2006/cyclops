@@ -1,0 +1,8 @@
+<mj-text font-size="20px" font-weight="bold" color="#111827" padding-bottom="12px">
+  Internal Error Thrown!
+</mj-text>
+
+<mj-text font-size="16px" color="#111827" padding-bottom="8px">
+  <strong>Error message:</strong><br />
+  {{error}}
+</mj-text>

@@ -1,0 +1,53 @@
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Cereal, Helvetica Neue, Helvetica, sans-serif" font-size="16px" />
+      <mj-button background-color="#2563eb" color="white" font-weight="bold" border-radius="6px" inner-padding="14px 54px" />
+    </mj-attributes>
+    <mj-style>
+
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f5f5f5">
+
+    <!-- Logo (outside card) -->
+    <mj-section padding-top="40px" padding-bottom="0">
+      <mj-column>
+        <mj-image width="100px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png" alt="Logo" />
+      </mj-column>
+    </mj-section>
+
+    <!-- White Card -->
+    <mj-section padding-top="20px" padding-bottom="20px">
+      <mj-column background-color="#ffffff" padding="40px">
+        {{{body}}}
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer Info Section -->
+    <mj-section padding="20px 40px">
+      <mj-column>
+        <mj-text font-size="14px" align="center">
+          Need help? Visit our <a href="https://yourdomain.com/help-center" style="color: unset;text-decoration:underline;">Help Center</a>.
+        </mj-text>
+
+        <mj-text font-size="14px" align="center" padding-top="10px">
+          Thanks for choosing our service 🙌
+        </mj-text>
+
+        <mj-social font-size="14px" icon-size="24px" mode="horizontal" align="center" padding-top="20px">
+          <mj-social-element name="facebook" href="https://facebook.com/yourpage" />
+          <mj-social-element name="twitter" href="https://twitter.com/yourhandle" />
+          <mj-social-element name="linkedin" href="https://linkedin.com/company/yourcompany" />
+        </mj-social>
+
+        	<mj-text padding-top="32px" color="#999999" font-size="12px" align="center">BluAssist SRL</mj-text>
+          <mj-text color="#999999" font-size="12px" align="center">Plevnei Street 97, Cluj-Napoca, Romania</mj-text>
+          <mj-text color="#999999" font-size="12px" align="center">© 2025 BluAssist. All rights reserved.</mj-text>
+
+
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

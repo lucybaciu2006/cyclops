@@ -1,0 +1,4 @@
+export enum RecordPurchaseType {
+    FULL_VIDEO ='FULL_VIDEO' ,
+    FULL_VIDEO_WITH_HIGHLIGHTS = 'FULL_VIDEO_WITH_HIGHLIGHTS'
+}

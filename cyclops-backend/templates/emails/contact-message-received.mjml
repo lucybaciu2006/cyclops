@@ -1,0 +1,7 @@
+<mj-text font-size="20px" font-weight="bold" color="#111827" align="center" padding-bottom="8px">
+  Message Received!
+</mj-text>
+
+<mj-text font-size="16px" color="#4B5563" align="center" line-height="1.6">
+  Thank you for reaching out to us. Your message has been successfully received and our team will get back to you as soon as possible.
+</mj-text>

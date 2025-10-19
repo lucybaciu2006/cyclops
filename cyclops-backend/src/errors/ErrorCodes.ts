@@ -1,0 +1,3 @@
+export enum ErrorCodes {
+    SUBSCRIPTION_EXISTS = 'SUBSCRIPTION_EXISTS'
+}

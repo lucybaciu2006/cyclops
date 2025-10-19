@@ -1,0 +1,4 @@
+<mj-text font-size="14px" line-height="1.6" color="#333333" padding-bottom="24px">
+{{body}} 
+</mj-text>
+

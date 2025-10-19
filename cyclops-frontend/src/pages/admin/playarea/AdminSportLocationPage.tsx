@@ -1,0 +1,236 @@
+// AdminSportLocationPage.tsx
+import {useState, useMemo, useEffect} from "react";
+import { Input } from "@/components/ui/input.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Trash2, Pencil, Video } from "lucide-react"; // <-- add Video
+import {SportLocation} from "@/model/sport-location.ts";
+import {AdminService} from "@/services/AdminService.ts";
+import SportLocationDialog from "@/pages/admin/playarea/SportLocationDialog.tsx";
+import {toast} from "sonner";
+import ConfirmDialogService from "@/components/confirm-dialog/ConfirmDialogService.ts";
+import {useAdminAgents} from "@/hooks/useAdminAgents.ts";
+import CameraPreviewModal from "@/pages/admin/playarea/CameraPreviewModal.tsx";
+
+export default function AdminSportLocationPage() {
+    const [areas, setAreas] = useState<SportLocation[]>([]);
+    const [search, setSearch] = useState("");
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editItem, setEditItem] = useState<SportLocation | null>(null);
+
+    // PREVIEW modal state
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewLocId, setPreviewLocId] = useState<string | null>(null);
+    const [previewTitle, setPreviewTitle] = useState<string>("");
+
+    const { status: wsStatus, agentsByLocation, adminWs } = useAdminAgents();
+
+    const fetchData = () => { AdminService.getPlayAreas().then(setAreas); };
+    useEffect(() => { fetchData(); }, []);
+
+    const filteredAreas = useMemo(
+        () => areas.filter((a) => a.name.toLowerCase().includes(search.toLowerCase())),
+        [areas, search]
+    );
+
+    const handleDelete = async (id: string) => {
+        ConfirmDialogService.open({
+            title: "Delete Location",
+            confirmCallback: () => {
+                AdminService.deleteSportLocation(id).then(() => {
+                    toast.success("Location deleted");
+                    fetchData();
+                });
+            },
+        });
+    };
+
+    const openCreateDialog = () => { setEditItem(null); setDialogOpen(true); };
+    const openEditDialog   = (location: SportLocation) => { setEditItem(location); setDialogOpen(true); };
+    const handleEditSuccess   = () => { toast.success("Location updated"); setDialogOpen(false); fetchData(); };
+    const handleCreateSuccess = () => { toast.success("Location created"); setDialogOpen(false); fetchData(); };
+
+    // PREVIEW
+    const openPreview = (loc: SportLocation) => {
+        setPreviewLocId(loc._id);
+        setPreviewTitle(`${loc.name} — Live camera`);
+        setPreviewOpen(true);
+    };
+
+    // --- NEW: start recording via admin WebSocket ---
+    const requestRecording = (loc: SportLocation) => {
+        if (!adminWs || adminWs.readyState !== WebSocket.OPEN) {
+            toast.error("Admin socket is not connected.");
+            return;
+        }
+        const agent = agentsByLocation[loc._id];
+        if (!agent || agent.status !== "connected") {
+            toast.error("Device is offline.");
+            return;
+        }
+
+        // quick MVP prompt for duration (minutes)
+        const minStr = window.prompt("Record duration (minutes):", "10");
+        if (minStr === null) return; // canceled
+        const minutes = Number(minStr);
+        if (!Number.isFinite(minutes) || minutes <= 0) {
+            toast.error("Please enter a valid positive number.");
+            return;
+        }
+
+        const durationSec = Math.round(minutes * 60);
+        const recordingId = `rec_${loc._id}_${Date.now()}`;
+
+        const msg = {
+            // The backend should forward this to the agent for that location
+            type: "start_recording",
+            locationId: loc._id,
+            recordingId,
+            durationSec,
+            segmentSeconds: 60,
+            useLastDevice: true,
+            // optionally pass storage hints; backend can fill defaults:
+            // bucket: "cyclops-vod-dev",
+            // gcsPrefix: `loc/${loc._id}/rec/${recordingId}`,
+            metadata: { locationName: loc.name }
+        };
+
+        try {
+            adminWs.send(JSON.stringify(msg));
+            toast.success(`Recording requested for ${minutes} min`);
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to send recording request.");
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold">Sport Locations</h1>
+
+                <div className="text-sm text-gray-500">
+                    Admin socket:{" "}
+                    <span className="inline-flex items-center gap-2">
+            <span
+                className={`h-2 w-2 rounded-full ${
+                    wsStatus === "connected" ? "bg-green-500"
+                        : wsStatus === "reconnecting" ? "bg-yellow-500"
+                            : "bg-gray-400"
+                }`}
+            />
+                        {wsStatus}
+          </span>
+                </div>
+
+                <Button onClick={openCreateDialog}>Create New</Button>
+            </div>
+
+            <Input
+                placeholder="Search areas..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="max-w-sm"
+            />
+
+            <div className="border rounded-md">
+                <table className="w-full table-auto">
+                    <thead className="bg-gray-100">
+                    <tr className="text-left">
+                        <th className="px-4 py-2"></th>
+                        <th className="px-4 py-2">Name</th>
+                        <th className="px-4 py-2">Slug</th>
+                        <th className="px-4 py-2">Address</th>
+                        <th className="px-4 py-2">Status</th>
+                        <th className="px-4 py-2 w-48 text-center">Actions</th>{/* widened */}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {filteredAreas.map((area) => {
+                        const agent = agentsByLocation[area._id];
+                        const online = agent?.status === "connected";
+
+                        return (
+                            <tr key={area._id} className="border-t">
+                                <td style={{ height: 42 }}>
+                                    <img style={{ maxHeight: "100%" }} src={area.image?.url} />
+                                </td>
+                                <td className="px-4 py-2">{area.name}</td>
+                                <td className="px-4 py-2">{area.slug}</td>
+                                <td className="px-4 py-2">{area.address}</td>
+
+                                <td className="px-4 py-2">
+                                    <button
+                                        type="button"
+                                        disabled={!online || wsStatus !== "connected"}
+                                        onClick={() => openPreview(area)}
+                                        className={`inline-flex items-center gap-2 ${
+                                            online && wsStatus === "connected"
+                                                ? "cursor-pointer hover:underline"
+                                                : "cursor-not-allowed opacity-50"
+                                        }`}
+                                        title={online ? "Open live preview" : "Device offline"}
+                                    >
+                                        <span className={`h-2 w-2 rounded-full ${online ? "bg-green-500" : "bg-gray-400"}`} />
+                                        <span className="text-sm text-gray-700">
+                        {online ? "connected" : "disconnected"}
+                      </span>
+                                    </button>
+                                </td>
+
+                                <td className="px-4 py-2 flex justify-center gap-2">
+                                    <Button size="icon" variant="ghost" onClick={() => openEditDialog(area)}>
+                                        <Pencil className="w-4 h-4" />
+                                    </Button>
+
+                                    {/* NEW: Record action */}
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => requestRecording(area)}
+                                        disabled={!online || wsStatus !== "connected"}
+                                        className="inline-flex items-center gap-2"
+                                        title={online ? "Request a recording" : "Device offline"}
+                                    >
+                                        <Video className="w-4 h-4" />
+                                        Record
+                                    </Button>
+
+                                    <Button size="icon" variant="ghost" onClick={() => handleDelete(area._id)}>
+                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                    {filteredAreas.length === 0 && (
+                        <tr>
+                            <td colSpan={6} className="text-center px-4 py-6 text-gray-500">
+                                No areas found.
+                            </td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* PREVIEW MODAL */}
+            {previewLocId && (
+                <CameraPreviewModal
+                    open={previewOpen}
+                    onOpenChange={(v) => setPreviewOpen(v)}
+                    adminWs={adminWs}
+                    locationId={previewLocId}
+                    title={previewTitle}
+                />
+            )}
+
+            <SportLocationDialog
+                initialData={editItem}
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                onUpdate={handleEditSuccess}
+                onCreateSuccess={handleCreateSuccess}
+            />
+        </div>
+    );
+}

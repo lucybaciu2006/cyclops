@@ -1,0 +1,5 @@
+export enum ErrorCodes {
+    SUBSCRIPTION_EXISTS = 'SUBSCRIPTION_EXISTS',
+    INVALID_CODE = 'INVALID_CODE',
+    CODE_USED = 'CODE_USED',
+}
