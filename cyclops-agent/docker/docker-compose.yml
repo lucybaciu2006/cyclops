@@ -1,0 +1,13 @@
+services:
+  agent:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - backend.env
+    volumes:
+      - ./google-credentials.json:/app/google-credentials.json
+    # If you need VAAPI (Intel iGPU):
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "video"
