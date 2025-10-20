@@ -1,0 +1,6 @@
+export enum InboundCommand {
+    START_PREVIEW = 'START_PREVIEW',
+    STOP_PREVIEW = 'STOP_PREVIEW',
+    START_RECORDING = 'START_RECORDING'
+
+}
