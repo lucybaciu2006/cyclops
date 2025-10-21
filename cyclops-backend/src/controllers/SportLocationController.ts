@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {SportLocation} from "../models/entities/SportLocation";
+import {SportLocation} from "../models/location/SportLocation";
 
 export class SportLocationController {
     public static async getSportLocationBySlang(req: Request, res: Response): Promise<void> {

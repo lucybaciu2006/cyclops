@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {SportType} from "@/model/sport-type.ts";
 
 interface PlayAreaDialogProps {
     open: boolean;
@@ -28,7 +29,7 @@ interface PlayAreaDialogProps {
     initialData?: SportLocation | null;
 }
 
-const PLAY_AREA_TYPES = ["football", "minifootball", "tennis", "paddle"] as const;
+const PLAY_AREA_TYPES: SportType[] = [SportType.MINI_FOOTBALL] as const;
 
 export default function SportLocationDialog({
                                            open,
@@ -40,7 +41,7 @@ export default function SportLocationDialog({
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [address, setAddress] = useState("");
-    const [type, setType] = useState<SportLocation["sport"]>("minifootball");
+    const [type, setType] = useState<SportType>(SportType.MINI_FOOTBALL);
     const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
@@ -50,7 +51,7 @@ export default function SportLocationDialog({
             setName(initialData?.name || "");
             setSlug(initialData?.slug || "");
             setAddress(initialData?.address || "");
-            setType(initialData?.sport || "minifootball");
+            setType(initialData?.sport || SportType.MINI_FOOTBALL);
             setCoordinates(initialData?.coordinates || null);
             setImagePreview(initialData.image?.url);
             setImageFile(null);

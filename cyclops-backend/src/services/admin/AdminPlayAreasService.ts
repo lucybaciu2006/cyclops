@@ -1,5 +1,5 @@
 import {SearchOptions} from "../../controllers/admin/model/SearchOptions";
-import {ISportLocation, SportLocation} from "../../models/entities/SportLocation";
+import {ISportLocation, SportLocation} from "../../models/location/SportLocation";
 
 export interface PlayAreaListResponse {
     id: string;

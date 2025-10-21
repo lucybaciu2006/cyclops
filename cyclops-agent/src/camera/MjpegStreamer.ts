@@ -9,6 +9,7 @@ export interface PreviewOpts {
     height?: number;   // default 720
     fps?: number;      // default 10
     quality?: number;  // 2(best)..31(worst) default 6
+    inputUrl?: string; // if provided, use IP camera/RTSP/HTTP source instead of USB
 }
 
 export class MjpegStreamer {
@@ -93,6 +94,22 @@ export class MjpegStreamer {
 
 
     private buildArgs(w: number, h: number, fps: number, q: number): string[] {
+        // If an inputUrl is provided (RTSP/HTTP), always use that regardless of OS
+        if (this.opts.inputUrl) {
+            const url = this.opts.inputUrl;
+            const args: string[] = [];
+            if (url.startsWith('rtsp://')) {
+                args.push('-rtsp_transport', 'tcp');
+            }
+            // Input URL
+            args.push('-i', url);
+            // Filter: reduce fps and scale to target size
+            args.push('-vf', `fps=${Math.max(1, Math.floor(fps))},scale=${w}:${h}`);
+            // Encode to MJPEG for streaming
+            args.push('-q:v', String(q), '-f', 'mjpeg', 'pipe:1');
+            return args;
+        }
+
         if (this.platform === "linux") {
             const dev = this.opts.device || "/dev/video0";
             return [

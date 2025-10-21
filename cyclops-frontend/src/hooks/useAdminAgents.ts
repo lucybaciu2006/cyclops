@@ -12,6 +12,14 @@ export type AgentInfo = {
     remoteAddress?: string;
     userAgent?: string;
     apiKey?: string;
+    camera?: {
+        url?: string;
+        ip?: string;
+        method?: 'tcp' | 'http' | 'rtsp';
+        reachable?: boolean;
+        lastCheck?: ISO;
+        error?: string;
+    };
 };
 
 type SnapshotMsg     = { type: "snapshot"; agents: AgentInfo[]; time?: ISO };

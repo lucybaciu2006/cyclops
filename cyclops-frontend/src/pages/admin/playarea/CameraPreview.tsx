@@ -7,7 +7,7 @@ type Props = {
     quality?: number; // default 6 (2 best .. 31 worst)
 };
 
-export default function CameraPreview({ adminWs, locationId, fps = 10, quality = 6 }: Props) {
+export default function CameraPreview({ adminWs, locationId, fps = 1, quality = 8 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const activeRef = useRef(false);
 

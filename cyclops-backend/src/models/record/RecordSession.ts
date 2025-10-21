@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { SportType } from './SportType';
+import { SportType } from '../location/SportType';
 import { RecordSessionStatus } from './RecordSessionStatus';
 
 export interface IRecordSession extends Document {

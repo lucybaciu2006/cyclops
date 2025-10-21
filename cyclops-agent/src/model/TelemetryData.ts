@@ -61,5 +61,12 @@ export interface TelemetryData {
   };
   process: ProcessTelemetry;
   agent: AgentStateTelemetry;
+  camera?: {
+    url?: string;
+    ip?: string;
+    method?: 'tcp' | 'http' | 'rtsp';
+    reachable: boolean;
+    lastCheck: string;
+    error?: string;
+  };
 }
-

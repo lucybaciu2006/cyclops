@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {ISportLocation, SportLocation} from "../../models/entities/SportLocation";
+import {ISportLocation, SportLocation} from "../../models/location/SportLocation";
 import {SportLocationService} from "../../services/SportLocationService";
 
 export interface PlayAreaListFilters {
@@ -26,7 +26,6 @@ export class AdminSportLocationController {
     }
 
     static async update(req: Request, res: Response): Promise<void> {
-        try {
             const id = req.params.id;
             const body: Partial<ISportLocation> = req.body;
 
@@ -40,9 +39,6 @@ export class AdminSportLocationController {
             }
 
             res.json(location);
-        } catch (error: any) {
-            res.status(400).json({ error: error.message });
-        }
     }
 
     public static async uploadThumbnail(req: Request, res: Response): Promise<void> {

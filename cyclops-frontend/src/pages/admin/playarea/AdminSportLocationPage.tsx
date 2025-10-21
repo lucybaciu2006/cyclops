@@ -2,7 +2,7 @@
 import {useState, useMemo, useEffect} from "react";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Trash2, Pencil, Video } from "lucide-react"; // <-- add Video
+import { Trash2, Pencil, Video, Camera } from "lucide-react"; // <-- add Video, Camera
 import {SportLocation} from "@/model/sport-location.ts";
 import {AdminService} from "@/services/AdminService.ts";
 import SportLocationDialog from "@/pages/admin/playarea/SportLocationDialog.tsx";
@@ -159,22 +159,16 @@ export default function AdminSportLocationPage() {
                                 <td className="px-4 py-2">{area.address}</td>
 
                                 <td className="px-4 py-2">
-                                    <button
-                                        type="button"
-                                        disabled={!online || wsStatus !== "connected"}
-                                        onClick={() => openPreview(area)}
-                                        className={`inline-flex items-center gap-2 ${
-                                            online && wsStatus === "connected"
-                                                ? "cursor-pointer hover:underline"
-                                                : "cursor-not-allowed opacity-50"
-                                        }`}
-                                        title={online ? "Open live preview" : "Device offline"}
-                                    >
-                                        <span className={`h-2 w-2 rounded-full ${online ? "bg-green-500" : "bg-gray-400"}`} />
-                                        <span className="text-sm text-gray-700">
-                        {online ? "connected" : "disconnected"}
-                      </span>
-                                    </button>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="inline-flex items-center gap-2">
+                                            <span className={`h-2 w-2 rounded-full ${online ? "bg-green-500" : "bg-gray-400"}`} />
+                                            <span className="text-sm text-gray-700">{online ? "agent: online" : "agent: offline"}</span>
+                                        </div>
+                                        <div className="inline-flex items-center gap-2">
+                                            <span className={`h-2 w-2 rounded-full ${agent?.camera?.reachable ? "bg-green-500" : "bg-gray-400"}`} />
+                                            <span className="text-xs text-gray-600">{agent?.camera?.reachable ? "camera: online" : "camera: offline"}</span>
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <td className="px-4 py-2 flex justify-center gap-2">
@@ -182,7 +176,20 @@ export default function AdminSportLocationPage() {
                                         <Pencil className="w-4 h-4" />
                                     </Button>
 
-                                    {/* NEW: Record action */}
+                                    {/* NEW: Preview action */}
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => openPreview(area)}
+                                        disabled={!online || wsStatus !== "connected"}
+                                        className="inline-flex items-center gap-2"
+                                        title={online ? "Open live preview" : "Device offline"}
+                                    >
+                                        <Camera className="w-4 h-4" />
+                                        Preview
+                                    </Button>
+
+                                    {/* Record action */}
                                     <Button
                                         size="sm"
                                         variant="secondary"

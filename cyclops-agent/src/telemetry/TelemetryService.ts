@@ -1,5 +1,6 @@
 import os from 'os';
 import { TelemetryData, AgentStateTelemetry } from "../model/TelemetryData";
+import { CameraHealth } from "../camera/CameraHealthService";
 
 /**
  * TelemetryService collects system and process metrics for the agent.
@@ -9,6 +10,11 @@ export class TelemetryService {
   private prevCpuInfo: os.CpuInfo[] | null = null;
   private prevProcCpu: NodeJS.CpuUsage | null = null;
   private prevHrtimeNs: bigint | null = null;
+  private _cameraProvider?: () => CameraHealth | undefined;
+
+  constructor() {
+    console.log('constructor called');
+  }
 
   collect(agent: AgentStateTelemetry): TelemetryData {
     const now = new Date();
@@ -105,7 +111,27 @@ export class TelemetryService {
       agent,
     };
 
+    // Attach last-known camera health if available
+    const cam = this._cameraProvider?.();
+    if (cam) {
+      telemetry.camera = {
+        url: cam.url,
+        ip: cam.ip,
+        method: cam.method,
+        reachable: cam.reachable,
+        lastCheck: cam.lastCheck,
+        error: cam.error,
+      };
+    }
+
     return telemetry;
   }
-}
 
+  setCameraProvider(fn: () => CameraHealth | undefined) {
+    this._cameraProvider = fn;
+  }
+
+  play() {
+    console.log('it works');
+  }
+}

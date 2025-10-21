@@ -23,7 +23,7 @@ import { StripeWebhooksController } from "./controllers/StripeWebhooksController
 import { PaymentController } from "./controllers/PaymentController";
 import { SupportController } from "./controllers/SupportController";
 
-import { ISportLocation, SportLocation } from "./models/entities/SportLocation";
+import { ISportLocation, SportLocation } from "./models/location/SportLocation";
 
 // NEW imports (state + ws wiring)
 import { agentsPool } from "./core/ws/AgentsPool";
@@ -53,20 +53,25 @@ new AdminHub(wssAdmin).init();     // streams pool events/snapshot to admins
 // --- Preview relay wiring (Admin <-> Backend <-> Agent) ---
 type AdminClient = WebSocket;
 const watchers = new Map<string, Set<AdminClient>>(); // locationId -> admin clients
+const previewParams = new Map<string, { fps?: number; quality?: number }>();
 
 function getAgentSocket(locationId: string): WebSocket | undefined {
     return agentsPool.get(locationId)?.ws;
 }
 
-function subscribeWatcher(locationId: string, ws: AdminClient) {
+function subscribeWatcher(locationId: string, ws: AdminClient, params?: { fps?: number; quality?: number }) {
     let set = watchers.get(locationId);
     if (!set) watchers.set(locationId, (set = new Set()));
     set.add(ws);
+    if (params) previewParams.set(locationId, params);
 
     // If this is the first viewer, ask the agent to start preview
     if (set.size === 1) {
         const agentWs = getAgentSocket(locationId);
-        agentWs?.send(JSON.stringify({ type: "command", cmd: "startPreview", fps: 10, quality: 6 }));
+        const pp = previewParams.get(locationId) || {};
+        const fps = (pp.fps ?? 1);
+        const quality = (pp.quality ?? 8);
+        agentWs?.send(JSON.stringify({ type: "command", cmd: "startPreview", fps, quality }));
     }
 }
 
@@ -78,6 +83,7 @@ function unsubscribeWatcher(locationId: string, ws: AdminClient) {
         // Last viewer left → stop preview at agent
         const agentWs = getAgentSocket(locationId);
         agentWs?.send(JSON.stringify({ type: "command", cmd: "stopPreview" }));
+        previewParams.delete(locationId);
     }
 }
 
@@ -113,7 +119,7 @@ wssAdmin.on("connection", (ws) => {
         try { msg = JSON.parse(raw.toString()); } catch { return; }
         console.log('received admin command', msg);
         if (msg?.type === "preview-start" && msg.locationId) {
-            subscribeWatcher(msg.locationId, ws);
+            subscribeWatcher(msg.locationId, ws, { fps: msg.fps, quality: msg.quality });
         }
         if (msg?.type === "preview-stop" && msg.locationId) {
             unsubscribeWatcher(msg.locationId, ws);

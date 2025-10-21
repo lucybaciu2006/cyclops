@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import {StoredFile} from "../StoredFile";
-import {SportType} from "../record/SportType";
+import {SportType} from "./SportType";
 
 export interface ISportLocation extends Document {
     name: string;

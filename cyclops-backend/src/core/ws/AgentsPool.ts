@@ -17,6 +17,14 @@ export interface AgentInfo {
     remoteAddress?: string;
     userAgent?: string;
     apiKey?: string;
+    camera?: {
+        url?: string;
+        ip?: string;
+        method?: 'tcp' | 'http' | 'rtsp';
+        reachable?: boolean;
+        lastCheck?: ISO;
+        error?: string;
+    };
 
     /** live socket; present only if connected */
     ws?: HBWS;

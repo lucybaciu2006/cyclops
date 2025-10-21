@@ -60,10 +60,26 @@ export class AgentGateway {
                 return;
             }
 
-            if (msg?.type === "heartbeat") {
-                agentsPool.heartbeat(locationId);
-                return;
-            }
+      if (msg?.type === "heartbeat") {
+        // update lastSeen
+        agentsPool.heartbeat(locationId);
+
+        // optionally upsert camera info from telemetry
+        const cam = (msg as any)?.telemetry?.camera;
+        if (cam) {
+          agentsPool.upsert(locationId, {
+            camera: {
+              url: cam.url,
+              ip: cam.ip,
+              method: cam.method,
+              reachable: cam.reachable,
+              lastCheck: cam.lastCheck,
+              error: cam.error,
+            } as any,
+          } as any);
+        }
+        return;
+      }
 
             // handle other commands if you add any
         });

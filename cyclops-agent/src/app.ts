@@ -1,20 +1,22 @@
-import { UsbCameraController } from "./camera/UsbCameraController";
 import { TelemetryService } from "./telemetry/TelemetryService";
+import { CameraHealthService } from "./camera/CameraHealthService";
 import { WebSocketClient } from "./ws/WebSocketClient";
 import { WebSocketCommandHandler } from "./handlers/WebSocketCommandHandler";
+import {env} from "./env";
 
-const SERVER_URL = 'ws://localhost:3000/agents';
-const API_KEY = 'SECRET_API_KEY';
-const AGENT_ID = 'HP_EliteDesk';
-const LOCATION_ID = '6895eef8ab6ecd1201d71372';
-const GCS_BUCKET = 'cyclops-videos';
+const SERVER_URL = env.SERVER_WS_ADDRESS;
 
-// List video devices at startup for observability
-UsbCameraController.listVideoDevices().then(devices => {
-  console.log('Video devices:', devices);
-});
-
+// Camera health checker using env vars
+const CAM_INPUT_URL = env.CAM_INPUT_URL;
+const CAMERA_IP = env.CAMERA_IP;
+const camHealth = new CameraHealthService({ url: CAM_INPUT_URL, ip: CAMERA_IP, intervalMs: 10000 });
+camHealth.start();
+console.log(camHealth);
 const telemetry = new TelemetryService();
+telemetry.play();
+
+console.log(telemetry);
+telemetry.setCameraProvider(() => camHealth.snapshot());
 
 // Build the handler which manages preview/recording and uses the WebSocketClient to respond
 let client: WebSocketClient;
@@ -22,17 +24,17 @@ let client: WebSocketClient;
 const commandHandler = new WebSocketCommandHandler({
   sendJson: (j) => client?.sendJson(j),
   sendBinary: (b) => client?.sendBinary(b),
-  agentId: AGENT_ID,
-  locationId: LOCATION_ID,
-  gcsBucket: GCS_BUCKET,
+  agentId: env.DEVICE_ID,
+  locationId: env.LOCATION_ID,
+  gcsBucket: env.GOOGLE_CLOUD_BUCKET,
 });
 
 client = new WebSocketClient({
   url: SERVER_URL,
   headers: {
     'User-Agent': 'node-agent/1.0',
-    'x-location-id': LOCATION_ID,
-    'x-api-key': API_KEY,
+    'x-location-id': env.LOCATION_ID,
+    'x-api-key': env.API_KEY,
   },
   heartbeatIntervalMs: 15000,
   buildHeartbeat: () => {
@@ -54,7 +56,7 @@ client = new WebSocketClient({
   },
   onOpen: () => {
     console.log('[agent] connected');
-    client.sendJson({ type: 'hello', agentId: AGENT_ID, version: '1.0.0' });
+    client.sendJson({ type: 'hello', agentId: env.DEVICE_ID, version: '1.0.0' });
   },
   onMessage: async (msg) => {
     console.log('MSG RECEIVED:', msg);

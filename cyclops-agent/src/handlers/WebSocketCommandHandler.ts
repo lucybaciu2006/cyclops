@@ -63,7 +63,7 @@ export class WebSocketCommandHandler {
       return;
     }
 
-    if (!this.preview) this.preview = new MjpegStreamer({ fps: fps ?? 10, quality: quality ?? 6 });
+    if (!this.preview) this.preview = new MjpegStreamer({ fps: fps ?? 10, quality: quality ?? 6, inputUrl: process.env.CAM_INPUT_URL });
 
     this.preview.onLog   = (line) => this.deps.sendJson({ type: 'preview-log', line });
     this.preview.onError = (line) => this.deps.sendJson({ type: 'preview-error', line });

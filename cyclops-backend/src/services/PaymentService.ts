@@ -4,7 +4,7 @@ import {CriticalError} from "../errors/CriticalError";
 import Stripe from "stripe";
 import {UserPayment} from "../models/UserPayment";
 import {CreatePurchaseOrderRequest} from "../models/payment/CreatePurchaseOrderRequest";
-import {SportLocation} from "../models/entities/SportLocation";
+import {SportLocation} from "../models/location/SportLocation";
 
 export class PaymentService {
 
