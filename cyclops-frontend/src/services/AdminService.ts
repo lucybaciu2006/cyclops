@@ -8,13 +8,13 @@ export interface AdminUser {
     email: string;
     name: string;
     lastInteraction?: string;
-    trialSecondsLeft: number;
-    creditsConsumed: number;
-    propertiesCount: number;
-    webrtcTimeSeconds: number;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
+    trialSecondsLeft?: number;
+    creditsConsumed?: number;
+    propertiesCount?: number;
+    webSessionSeconds?: number; // backend field name
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export class AdminService {
@@ -22,14 +22,19 @@ export class AdminService {
     public static async getUsers(params?: {
         page?: number;
         perPage?: number;
-        sort?: string;
+        sort?: [string, 'ASC' | 'DESC'];
         filter?: any;
     }): Promise<{ data: AdminUser[]; total: number }> {
-        const response = await axiosInstance.get("/admin/users", { params });
-        return {
-            data: response.data,
-            total: parseInt(response.headers['x-total-count'] || response.data.length, 10),
-        };
+        const qp: any = {};
+        if (params?.page != null) qp.page = params.page;
+        if (params?.perPage != null) qp.perPage = params.perPage;
+        qp.sort = JSON.stringify(params?.sort ?? ["_id", "ASC"]);
+        qp.filter = JSON.stringify(params?.filter ?? {});
+
+        const response = await axiosInstance.get("/admin/users", { params: qp });
+        const totalHeader = response.headers['content-range'] || response.headers['x-total-count'];
+        const total = parseInt(totalHeader || (response.data?.length ?? 0), 10);
+        return { data: response.data as AdminUser[], total };
     }
 
     public static async getUser(id: string): Promise<AdminUser> {

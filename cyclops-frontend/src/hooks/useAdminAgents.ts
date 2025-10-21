@@ -20,6 +20,13 @@ export type AgentInfo = {
         lastCheck?: ISO;
         error?: string;
     };
+    telemetry?: {
+        cpu?: { usagePercent?: number | null };
+        memory?: { total?: number; free?: number; used?: number; usedPercent?: number };
+        disk?: { total?: number; free?: number; used?: number; usedPercent?: number };
+        uptimeSec?: number;
+        timestamp?: ISO;
+    };
 };
 
 type SnapshotMsg     = { type: "snapshot"; agents: AgentInfo[]; time?: ISO };

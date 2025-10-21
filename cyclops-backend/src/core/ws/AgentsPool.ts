@@ -26,6 +26,15 @@ export interface AgentInfo {
         error?: string;
     };
 
+    // Latest telemetry snapshot (subset used by admin UI)
+    telemetry?: {
+        cpu?: { usagePercent?: number | null };
+        memory?: { total?: number; free?: number; used?: number; usedPercent?: number };
+        disk?: { total?: number; free?: number; used?: number; usedPercent?: number };
+        uptimeSec?: number;
+        timestamp?: ISO;
+    };
+
     /** live socket; present only if connected */
     ws?: HBWS;
 }

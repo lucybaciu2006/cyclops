@@ -64,20 +64,34 @@ export class AgentGateway {
         // update lastSeen
         agentsPool.heartbeat(locationId);
 
-        // optionally upsert camera info from telemetry
-        const cam = (msg as any)?.telemetry?.camera;
+        const telemetry = (msg as any)?.telemetry;
+        const cam = telemetry?.camera;
+        const mem = telemetry?.memory;
+        const cpu = telemetry?.cpu;
+        const disk = telemetry?.disk;
+        const ts = telemetry?.timestamp ?? (msg as any)?.ts;
+        const uptimeSec = telemetry?.uptimeSec ?? (msg as any)?.metrics?.uptimeSec;
+
+        const patch: any = {};
         if (cam) {
-          agentsPool.upsert(locationId, {
-            camera: {
-              url: cam.url,
-              ip: cam.ip,
-              method: cam.method,
-              reachable: cam.reachable,
-              lastCheck: cam.lastCheck,
-              error: cam.error,
-            } as any,
-          } as any);
+          patch.camera = {
+            url: cam.url,
+            ip: cam.ip,
+            method: cam.method,
+            reachable: cam.reachable,
+            lastCheck: cam.lastCheck,
+            error: cam.error,
+          };
         }
+        patch.telemetry = {
+          cpu: { usagePercent: cpu?.usagePercent },
+          memory: mem ? { total: mem.total, free: mem.free, used: mem.used, usedPercent: mem.usedPercent } : undefined,
+          disk: disk ? { total: disk.total, free: disk.free, used: disk.used, usedPercent: disk.usedPercent } : undefined,
+          uptimeSec,
+          timestamp: ts,
+        };
+
+        agentsPool.upsert(locationId, patch);
         return;
       }
 
