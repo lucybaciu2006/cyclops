@@ -12,6 +12,9 @@ export type AgentInfo = {
     remoteAddress?: string;
     userAgent?: string;
     apiKey?: string;
+    activity?: 'IDLE' | 'RECORDING';
+    recordingId?: string;
+    preview?: boolean;
     camera?: {
         url?: string;
         ip?: string;

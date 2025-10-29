@@ -12,4 +12,5 @@ export interface SportLocation {
     };
     image?: StoredFile;
     sport: SportType;
+    snapshotUrl?: string;
 }

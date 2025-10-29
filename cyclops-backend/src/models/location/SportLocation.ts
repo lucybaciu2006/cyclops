@@ -12,6 +12,7 @@ export interface ISportLocation extends Document {
     };
     image?: StoredFile;
     sport: SportType;
+    snapshotUrl?: string;
 }
 
 const SportLocationSchema = new Schema<ISportLocation>({
@@ -42,6 +43,11 @@ const SportLocationSchema = new Schema<ISportLocation>({
     image: {
         type: Object, // assuming StoredFile is a plain object
         required: false
+    },
+    snapshotUrl: {
+        type: String,
+        required: false,
+        trim: true
     }
 }, {
     timestamps: true

@@ -2,6 +2,7 @@ import { MjpegStreamer } from "../camera/MjpegStreamer";
 import { SegmentRecorderUploader } from "../upload/SegmentRecorderUploader";
 import { InboundCommand } from "../commands/InboundCommand";
 import { AgentStateTelemetry } from "../model/TelemetryData";
+import { AgentRuntimeState } from "../model/AgentRuntimeState";
 
 export interface CommandHandlerDeps {
   sendJson: (json: unknown) => void;
@@ -21,9 +22,9 @@ export class WebSocketCommandHandler {
 
   getAgentState(): AgentStateTelemetry {
     return {
-      recording: !!this.recorder && this.recorder.status !== 'idle',
-      recordingId: this.currentRecordingId,
-      preview: !!this.preview && !!this.preview.running,
+      recording: AgentRuntimeState.recording,
+      recordingId: AgentRuntimeState.recordingId,
+      preview: AgentRuntimeState.preview,
     };
   }
 
@@ -81,12 +82,14 @@ export class WebSocketCommandHandler {
       });
     }
     this.deps.sendJson({ type: 'preview-status', status: 'started' });
+    AgentRuntimeState.setPreview(true);
   }
 
   private stopPreview() {
     this.preview?.stop();
     this.preview = null;
     this.deps.sendJson({ type: 'preview-status', status: 'stopped' });
+    AgentRuntimeState.setPreview(false);
   }
 
   // ---------- Recording helpers ----------
@@ -115,6 +118,7 @@ export class WebSocketCommandHandler {
 
     this.recorder = new SegmentRecorderUploader();
     this.currentRecordingId = recordingId;
+    AgentRuntimeState.setRecording(true, recordingId);
 
     const gcsPrefix = `videos/full/${Date.now()}`;
 
@@ -172,6 +176,7 @@ export class WebSocketCommandHandler {
           } finally {
             this.recorder = null;
             this.currentRecordingId = null;
+            AgentRuntimeState.setRecording(false, null);
           }
         }, durationMinutes * 1000 * 60);
       }
@@ -181,6 +186,7 @@ export class WebSocketCommandHandler {
       this.deps.sendJson({ type: 'recording-nack', error: e?.message || String(e) });
       this.recorder = null;
       this.currentRecordingId = null;
+      AgentRuntimeState.setRecording(false, null);
     }
   }
 
@@ -198,6 +204,7 @@ export class WebSocketCommandHandler {
     } finally {
       this.recorder = null;
       this.currentRecordingId = null;
+      AgentRuntimeState.setRecording(false, null);
     }
   }
 }

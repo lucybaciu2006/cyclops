@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Storage } from "@google-cloud/storage";
+import { createStorage } from "../storage/GcsClient";
 import { FfmpegRecorder } from "../recording/FfmpegRecorder";
 
 export type ISO = string;
@@ -67,7 +68,7 @@ export class SegmentRecorderUploader {
         preset: NonNullable<StartRecordOptions['preset']>;
         metadata: Record<string, string>;
     });
-    private storage = new Storage({ keyFilename: "C:\\work\\certs\\cyclops-agent.json" }); // or rely on GOOGLE_APPLICATION_CREDENTIALS
+    private storage: Storage = createStorage();
     private statusState: RecorderStatus = "idle";
     private currentFile?: string;
 

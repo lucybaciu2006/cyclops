@@ -3,8 +3,18 @@ import { CameraHealthService } from "./camera/CameraHealthService";
 import { WebSocketClient } from "./ws/WebSocketClient";
 import { WebSocketCommandHandler } from "./handlers/WebSocketCommandHandler";
 import {env} from "./env";
+import { SnapshotService } from "./snapshot/SnapshotService";
 
 const SERVER_URL = env.SERVER_WS_ADDRESS;
+const HTTP_BASE = env.SERVER_HTTP_BASE || (() => {
+  try {
+    const u = new URL(SERVER_URL);
+    const scheme = u.protocol === 'wss:' ? 'https:' : 'http:';
+    return `${scheme}//${u.host}`;
+  } catch {
+    return 'http://localhost:3000';
+  }
+})();
 
 // Camera health checker using env vars
 const CAM_INPUT_URL = env.CAM_INPUT_URL;
@@ -71,3 +81,14 @@ client = new WebSocketClient({
 });
 
 client.connect();
+
+// Start snapshot service (every 30s by default)
+const snapInterval = Number(env.SNAPSHOT_INTERVAL_SEC || '30');
+const snapshotter = new SnapshotService({
+  serverHttpBase: HTTP_BASE,
+  locationId: env.LOCATION_ID,
+  apiKey: env.API_KEY,
+  inputUrl: CAM_INPUT_URL,
+  intervalSec: isFinite(snapInterval) ? snapInterval : 30,
+});
+snapshotter.start();

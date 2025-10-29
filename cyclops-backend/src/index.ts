@@ -18,6 +18,9 @@ import { AdminUsersController } from "./controllers/admin/AdminUsersController";
 import { AdminTicketsController } from "./controllers/admin/AdminTicketsController";
 import { AdminInvitationsController } from "./controllers/admin/AdminInvitationsController";
 import { AdminSportLocationController } from "./controllers/admin/AdminSportLocationController";
+import { AdminRecordingSessionsController } from "./controllers/admin/AdminRecordingSessionsController";
+import { AdminAgentController } from "./controllers/admin/AdminAgentController";
+import { AdminRecordingJobsController } from "./controllers/admin/AdminRecordingJobsController";
 import { SportLocationController } from "./controllers/SportLocationController";
 import { StripeWebhooksController } from "./controllers/StripeWebhooksController";
 import { PaymentController } from "./controllers/PaymentController";
@@ -177,6 +180,21 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- Public agent helper endpoint BEFORE auth (MVP): return location (incl. snapshotUrl)
+app.get("/api/agents/location", async (req, res) => {
+    try {
+        const locationId = req.header('x-location-id') as string | undefined;
+        const apiKey = req.header('x-api-key') as string | undefined;
+        if (!locationId /*|| !apiKey*/) return res.status(401).json({ error: 'Missing auth headers' });
+
+        const location: ISportLocation | null = await SportLocation.findById(locationId).lean();
+        if (!location) return res.status(404).json({ error: 'Location not found' });
+        res.json(location);
+    } catch (e: any) {
+        res.status(500).json({ error: e?.message || 'Internal error' });
+    }
+});
+
 // Apply authentication middleware globally
 app.use(authenticateToken);
 
@@ -188,10 +206,15 @@ app.post("/api/admin/invitations", AdminInvitationsController.create);
 app.get("/api/admin/users", AdminUsersController.list);
 
 app.get("/api/admin/sport-locations", AdminSportLocationController.list);
+app.get("/api/admin/sport-locations/:id", AdminSportLocationController.getOne);
 app.post("/api/admin/sport-locations", AdminSportLocationController.create);
 app.put("/api/admin/sport-locations/:id", AdminSportLocationController.update);
 app.delete("/api/admin/sport-locations/:id", AdminSportLocationController.delete);
 app.post("/api/admin/sport-locations/:id/image", upload.single("file"), AdminSportLocationController.uploadThumbnail);
+app.get("/api/admin/recording-sessions", AdminRecordingSessionsController.list);
+app.post("/api/admin/recording-sessions", AdminRecordingSessionsController.create);
+app.post("/api/admin/agents/:locationId/start-recording", AdminAgentController.startRecording);
+app.get("/api/admin/recording-jobs", AdminRecordingJobsController.list);
 
 // Admin Tickets Routes
 app.get("/api/admin/tickets", AdminTicketsController.list);

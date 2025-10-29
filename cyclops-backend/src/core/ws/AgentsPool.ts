@@ -35,6 +35,11 @@ export interface AgentInfo {
         timestamp?: ISO;
     };
 
+    // Activity/state reported by agent
+    activity?: 'IDLE' | 'RECORDING';
+    recordingId?: string;
+    preview?: boolean;
+
     /** live socket; present only if connected */
     ws?: HBWS;
 }

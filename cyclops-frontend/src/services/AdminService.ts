@@ -1,5 +1,7 @@
 import { axiosInstance } from "@/lib/axios.config";
 import { SportLocation } from "@/model/sport-location.ts";
+import { RecordingSession } from "@/model/recording-session.ts";
+import { RecordingJob } from "@/model/recording-job";
 
 // ========== USERS ==========
 
@@ -87,5 +89,37 @@ export class AdminService {
 
     public static async deleteSportLocation(id: string): Promise<void> {
         await axiosInstance.delete(`/admin/sport-locations/${id}`);
+    }
+
+    // ========== RECORDING SESSIONS ==========
+    public static async getRecordingSessions(params: {
+        locationId: string;
+        fromDay: string; // YYYY-MM-DD
+        toDay: string;   // YYYY-MM-DD
+    }): Promise<RecordingSession[]> {
+        const response = await axiosInstance.get(`/admin/recording-sessions`, { params });
+        return response.data as RecordingSession[];
+    }
+
+    public static async createRecordingSession(body: {
+        userId?: string;
+        locationId: string;
+        startTimeMs: number;
+        durationMinutes: number;
+        slotMinutes?: number;
+        status?: string;
+        metadata?: any;
+    }): Promise<RecordingSession> {
+        const response = await axiosInstance.post(`/admin/recording-sessions`, body);
+        return response.data as RecordingSession;
+    }
+
+    public static async startAgentRecording(locationId: string, durationMinutes: number, metadata?: any): Promise<void> {
+        await axiosInstance.post(`/admin/agents/${locationId}/start-recording`, { durationMinutes, metadata });
+    }
+
+    public static async getRecentRecordingJobs(locationId: string, limit = 10): Promise<RecordingJob[]> {
+        const res = await axiosInstance.get(`/admin/recording-jobs`, { params: { locationId, limit } });
+        return res.data as RecordingJob[];
     }
 }

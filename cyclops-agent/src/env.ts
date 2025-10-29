@@ -8,11 +8,13 @@ const envSchema = z.object({
     LOCATION_ID: z.string(),
     LOCAL_STORAGE_PATH: z.string(),
     API_KEY: z.string().min(1),
-    GOOGLE_APPLICATION_CREDENTIALS: z.string(),
+    GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
     GOOGLE_CLOUD_BUCKET: z.string(),
     CAM_INPUT_URL: z.string(),
     CAMERA_IP: z.string(),
-    SERVER_WS_ADDRESS: z.string()
+    SERVER_WS_ADDRESS: z.string(),
+    SERVER_HTTP_BASE: z.string().optional(),
+    SNAPSHOT_INTERVAL_SEC: z.string().optional(),
 
 });
 

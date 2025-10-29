@@ -30,6 +30,7 @@ import ScrollToTop from "@/core/ScrollToTop.tsx";
 import ConfirmDialogComponent from "@/components/confirm-dialog/ConfirmDialogComponent.tsx";
 import ContactSuccessPage from "@/pages/ContactSuccessPage.tsx";
 import AdminSportLocationPage from "@/pages/admin/playarea/AdminSportLocationPage.tsx";
+import AdminSportLocationDetailsPage from "@/pages/admin/playarea/AdminSportLocationDetailsPage.tsx";
 import AdminUsersPage from "@/pages/admin/users/AdminUsersPage.tsx";
 import AdminLayout from "@/components/layout/AdminLayout.tsx";
 import ScannedDevicePage from "@/pages/ScannedDevicePage.tsx";
@@ -91,6 +92,7 @@ const App = () => {
                             <Route path="admin" element={<AdminRoutes/>}>
                                 <Route path="" element={<Navigate to="/admin/sport-locations"/>}/>
                                 <Route path="sport-locations" element={<AdminSportLocationPage/>}/>
+                                <Route path="sport-locations/:id" element={<AdminSportLocationDetailsPage/>}/>
                                 <Route path="users" element={<AdminUsersPage/>}/>
                             </Route>
 

@@ -1,5 +1,6 @@
 // AdminSportLocationPage.tsx
 import {useState, useMemo, useEffect} from "react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Trash2, Pencil, Video, Camera } from "lucide-react"; // <-- add Video, Camera
@@ -208,6 +209,9 @@ export default function AdminSportLocationPage() {
                                             <span className={`h-2 w-2 rounded-full ${agent?.camera?.reachable ? "bg-green-500" : "bg-gray-400"}`} />
                                             <span className="text-xs text-gray-600">{agent?.camera?.reachable ? "camera: online" : "camera: offline"}</span>
                                         </div>
+                                        <div className="inline-flex items-center gap-2">
+                                            <span className="text-xs text-gray-600">state: {agent?.activity || 'IDLE'}</span>
+                                        </div>
                                     </div>
                                 </td>
 
@@ -225,6 +229,9 @@ export default function AdminSportLocationPage() {
                                 </td>
 
                                 <td className="px-4 py-2 flex justify-center gap-2">
+                                    <Link to={`/admin/sport-locations/${area._id}`}>
+                                        <Button size="sm" variant="outline">Details</Button>
+                                    </Link>
                                     <Button size="icon" variant="ghost" onClick={() => openEditDialog(area)}>
                                         <Pencil className="w-4 h-4" />
                                     </Button>

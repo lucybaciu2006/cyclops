@@ -91,7 +91,28 @@ export class AgentGateway {
           timestamp: ts,
         };
 
+        const metrics = (msg as any)?.metrics || {};
+        const isRec = !!metrics.recording;
+        patch.activity = isRec ? 'RECORDING' : 'IDLE';
+        if (metrics.recordingId) patch.recordingId = metrics.recordingId;
+        if (typeof metrics.preview === 'boolean') patch.preview = metrics.preview;
+
         agentsPool.upsert(locationId, patch);
+        return;
+      }
+
+      // Recording lifecycle events from agent
+      if (msg?.type === 'recording-done' && msg.recordingId) {
+        // Optional: update RecordingJob status to COMPLETED
+        import('../../models/entities/recording/RecordingJob').then(({ RecordingJob, RecordingJobStatus }) => {
+          RecordingJob.findOneAndUpdate({ recordingId: msg.recordingId }, { status: RecordingJobStatus.COMPLETED }).exec().catch(() => {});
+        }).catch(() => {});
+        return;
+      }
+      if (msg?.type === 'recording-error' && msg.recordingId) {
+        import('../../models/entities/recording/RecordingJob').then(({ RecordingJob, RecordingJobStatus }) => {
+          RecordingJob.findOneAndUpdate({ recordingId: msg.recordingId }, { status: RecordingJobStatus.FAILED }).exec().catch(() => {});
+        }).catch(() => {});
         return;
       }
 
